@@ -25,4 +25,48 @@ export class PagamentoController {
             next(new CustomError('Ops, algo deu errado na operação', 500, false, err))
         }
     }
+
+    async criar(request: Request, next: NextFunction): Promise<void> {
+
+        try {
+            const result = validationResult(request)
+
+            if (!result.isEmpty()) {
+                throw new CustomError('Parâmetros inválidos. Por favor, verifique as informações enviadas.', 400, false, result.array())
+            }  
+
+            const {nome, cpf, email, valor, parcelamento, meio, identificadorExterno} = request.body
+
+            let pag = new Pagamento(
+                nome,
+                cpf,
+                email,
+                valor,
+                parcelamento,
+                meio,
+                identificadorExterno
+                )
+
+            next(new CustomResponse(201, 'Criar Pagamento', await this.service.criar(pag)))
+        } catch (err){
+            next(new CustomError('Ops, algo deu errado na operação', 500, false, err))
+        }
+    }
+
+    async buscaUltimaVersao(request: Request, next: NextFunction): Promise<void> {
+
+        try {
+            const result = validationResult(request)
+
+            if (!result.isEmpty()) {
+                throw new CustomError('Parâmetros inválidos. Por favor, verifique as informações enviadas.', 400, false, result.array())
+            }  
+
+            const {identificadorExterno} = request.params
+
+            next(new CustomResponse(201, 'Consultar Pagamento', await this.service.buscaUltimaVersao(identificadorExterno)))
+        } catch (err){
+            next(new CustomError('Ops, algo deu errado na operação', 500, false, err))
+        }
+    }
 }
