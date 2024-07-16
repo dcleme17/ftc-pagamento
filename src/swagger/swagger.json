@@ -1,0 +1,106 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Tech Challenge Fiap",
+    "description": "Conjuntos dde recursos e operações do Tech Challenge da FIAP"
+  },
+  "host": [
+    "backend-koxvlyfy2a-rj.a.run.app"
+  ],
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Pagamento",
+      "description": "APIs do domínio de Pagamento"
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "securityDefinitions": {
+    "JWT": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "JWT Access Token - Incluir o Bearer"
+    }
+  },
+  "paths": {
+    "/api/health-check/v1": {
+      "get": {
+        "tags": [
+          "Pagamento"
+        ],
+        "summary": "Health Check da API",
+        "description": "Health Check da API",
+        "operationId": "gethealthcheck",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/pagamentos/v1/webhook/mercadopago": {
+      "post": {
+        "tags": [
+          "Pagamento"
+        ],
+        "summary": "Recebe os eventos de pagamento do parceiro",
+        "description": "Recebe os eventos do parceiro e envia para o domínio de pedidos",
+        "operationId": "postWebhookMercadopago",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/post_webhook_mercadopago"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "deprecated": false
+      }
+    }
+  },
+  "definitions": {
+    "post_webhook_mercadopago": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "example": "state_FINISHED"
+        },
+        "id": {
+          "type": "string",
+          "example": "123456"
+        }
+      },
+      "required": [
+        "action",
+        "id"
+      ]
+    }
+  },
+  "x-google-backend": {
+    "address": "https://backend-koxvlyfy2a-rj.a.run.app",
+    "jwt_audience": "https://backend-koxvlyfy2a-rj.a.run.app"
+  }
+}
