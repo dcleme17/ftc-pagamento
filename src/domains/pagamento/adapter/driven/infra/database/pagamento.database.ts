@@ -24,10 +24,11 @@ export class PagamentoDatabase extends MongoDB implements IPagamento {
             ,parcelamento : pagamento.getParcelamento()
             ,meio : pagamento.getMeio()
             ,identificadorExterno: pagamento.getIdentificadorExterno()
+            ,workflow : pagamento.getWorkflow()
             ,data : pagamento.getData()
             ,parceiroNegocio : pagamento.getParceiroNegocio()
             ,metadata: pagamento.getMetadata()
-            ,status : pagamento.getStatus()           
+            ,status : pagamento.getStatus()
         });
 
         return new PagamentoVersao(result.insertedId.toString(), result.insertedId.getTimestamp())
@@ -66,7 +67,8 @@ export class PagamentoDatabase extends MongoDB implements IPagamento {
             data?.valor,
             data?.parcelamento,
             data?.meio,
-            data?.identificadorExterno
+            data?.identificadorExterno,
+            data?.workflow
         )
 
         pagamento.setVersao(new PagamentoVersao(
@@ -75,7 +77,7 @@ export class PagamentoDatabase extends MongoDB implements IPagamento {
             )
         )
         pagamento.setMetadata(data?.metadata)
-        pagamento.setParceiroNegocio(data?.parceroNegocio)
+        pagamento.setParceiroNegocio(data?.parceiroNegocio)
         pagamento.setStatus(data?.status)
 
         return pagamento

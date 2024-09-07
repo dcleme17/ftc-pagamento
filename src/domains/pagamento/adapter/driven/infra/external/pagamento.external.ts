@@ -1,19 +1,19 @@
 import { Pagamento } from "domains/pagamento/core/entities/pagamento";
 import { MercadoPagoExternal } from "./mercadopago/mercadopago";
 import QRCode from "qrcode"
-import { PedidosExternal } from "./pedidos/pedidos";
+import { WorkflowsExternal } from "./workflows/workflows";
 
 export class PagamentoExternal {
 
     constructor() {}
     
-    async gerarCobrancaPix(pagamento: Pagamento): Promise<Object | null> {    
+    async gerarCobrancaPix(pagamento: Pagamento): Promise<object | null> {    
 
-        const external = new MercadoPagoExternal();
+        const external = new MercadoPagoExternal()
 
         const responsePedido = await external.criarPedido(
-            `Pedido de ${pagamento.getCpf()} em ${pagamento.getData()}`,
-            pagamento.getVersao()?.versao || '',
+            `Pedido de ${pagamento.getCpf() || 'cliente'} em ${pagamento.getData().toISOString()}`,
+            pagamento.getIdentificadorExterno(),
             pagamento.getValor().valueOf()
         );
 
@@ -27,14 +27,22 @@ export class PagamentoExternal {
         }
     }
 
-    async webhookPagamentos(pagamento: Pagamento): Promise<Object | null> {    
+    async consultaPedido(recurso: string): Promise<object> {
+        const external = new MercadoPagoExternal()
+        const pedido =  await external.consultarPedido(recurso).then()
 
-        const external = new PedidosExternal();
+        return pedido.data
+    }
 
-        const response = await external.webhookPagamento(
-            pagamento.getIdentificadorExterno()
-        );
+    async workflows(pagamento: Pagamento, evento: object): Promise<object | null> {
 
-        return response
+        const external = new WorkflowsExternal();
+
+        const response = await external.callback(
+            pagamento.getWorkflow().url as string,
+            evento
+        ).then()
+
+        return response.data
     }
 }

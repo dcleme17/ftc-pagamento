@@ -15,23 +15,33 @@ export class PagamentoUseCases {
         this.external = external
     }
 
+    /**
+     * Esse método está com 2 responsabilidades, criar a base de pagamentos e integrar com o Mercado Pago.
+     * Refatorar para ficar com uma única responsabilidade.
+     * Se houver problemas no acionamento do mercado pago, ficaremos com um pagamento associado ao pedido que nao gerou a cobrança
+     * @param pagamento 
+     * @returns 
+     */
     async criar(pagamento: Pagamento): Promise<PagamentoVersao | null> {
-
-        let metadata
         
         if (pagamento.getMeio() === MeioPagamento.PIX) {
             pagamento.setParceiroNegocio(ParceiroNegocioPagamento.MERCADOPAGO)
-            metadata = await this.external.gerarCobrancaPix(pagamento).then()
         } else {
             throw new CustomError('Meio de recebimento inválido', 400,false, [])
         }
 
-        if (!metadata) throw new CustomError('Não foi possível gerar o meio de recebimento solicitado', 500,false, [])
-
-        pagamento.setMetadata(metadata)
         pagamento.setStatus(StatusPagamento.PENDENTE)
 
         const pagamentoVersao: PagamentoVersao = await this.database.criar(pagamento).then()
+
+        const metadata = await this.external.gerarCobrancaPix(pagamento).then()
+        
+        pagamento.setVersao(pagamentoVersao);
+        this.database.versiona(pagamento);
+
+        pagamento.setMetadata(metadata)
+
+        this.database.criar(pagamento)
 
         return pagamentoVersao
     }
@@ -47,27 +57,35 @@ export class PagamentoUseCases {
         }
     }   
 
-    async webhookPagamentos(identificadorExterno: string, status: string): Promise<any>{
+    async webhookMercadoPago(identificadorExterno: string, payload: object): Promise<object>{
 
-        if(status !== StatusPagamentoMercadoPago.PAGAMENTO) {
-            return new CustomResponse(200, 'Evento Ignorado', null, false)
-        }
+        const pagamento: Pagamento = await this.database.buscaUltimaVersao(identificadorExterno).then()
+        const pedido: object = await this.external.consultaPedido(payload.resource).then()
+        
+        return this.external.workflows(pagamento, pedido).then()
+
+    }
+
+    async atualiza(identificadorExterno: string, payload: object): Promise<object>{
 
         const pagamento = await this.database.buscaUltimaVersao(identificadorExterno).then()
 
-        console.info(pagamento)
-
-        if (pagamento?.getStatus() !== StatusPagamento.PENDENTE) {
-            return new CustomError('O Pagamento não está com o status válido para baixa', 400, false, [])
+        if (!pagamento) {
+            return new CustomResponse(404, 'pagamento não encontrado', null, false)
         }
 
-        pagamento.setStatus(StatusPagamento.RECEBIDO)
+        if (payload.status) {
+
+            if(Object.values(StatusPagamentoMercadoPago).includes(payload.status)){
+                return new CustomResponse(400, 'status invalido', null, false)
+            }
+
+            pagamento.setStatus(payload.status)
+        }
 
         const versao: PagamentoVersao = await this.database.criar(pagamento).then()
 
         await this.database.versiona(pagamento).then()
-
-        await this.external.webhookPagamentos(pagamento).then()
 
         return versao;
 

@@ -20,14 +20,18 @@ spec:
     spec:     
       containerConcurrency: 80
       timeoutSeconds: 300
-      serviceAccountName: 197343799268-compute@developer.gserviceaccount.com
+      serviceAccountName: 91827266597-compute@developer.gserviceaccount.com
       containers:
       - name: pagamento-backend
-        image: southamerica-east1-docker.pkg.dev/oficina-facil-prd/cloud-run-source-deploy/pagamento-backend:latest
+        image: southamerica-east1-docker.pkg.dev/fiap-tech-challenge-5soat/fiap-docker/pagamento-backend:latest
         ports:
         - name: http1
           containerPort: 31301
         env:
+          - name: PROJECT_ID
+            value: fiap-tech-challenge-5soat
+          - name: REGION
+            value: southamerica-east1        
           - name: MERCADOPAGO_URL
             value: https://api.mercadopago.com/
           - name: MERCADOPAGO_USERID
@@ -37,12 +41,9 @@ spec:
           - name: MERCADOPAGO_POS
             value: SUC001
           - name: MERCADOPAGO_WEBHOOK_URL
-            value: http://fiap.com.br     
-          - name: SERVICE_ACCOUNT
-            valueFrom:
-              secretKeyRef:
-                key: latest
-                name: GOOGLE_APPLICATION_CREDENTIALS          
+            value: https://pagamento-backend-91827266597.southamerica-east1.run.app
+          - name: VERSAO
+            value: "09"            
           - name: DATABASE_URL
             valueFrom:
               secretKeyRef:
@@ -51,7 +52,7 @@ spec:
         resources:
           limits:
             cpu: '1000m'
-            memory: '1Gi'
+            memory: '512Mi'
         startupProbe:
           timeoutSeconds: 240
           periodSeconds: 240

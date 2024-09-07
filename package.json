@@ -7,10 +7,12 @@
     "dev": "tsx watch src/application",
     "start": "tsx src/application",
     "swagger": "tsx src/swagger.ts",
-    "build": "tsc ",
     "lint": "eslint -c .ts src",
     "lint:fix": "eslint --ext .ts src --fix",
-    "test": "jest"
+    "test": "jest",
+    "build": "gcloud builds submit --tag southamerica-east1-docker.pkg.dev/fiap-tech-challenge-5soat/fiap-docker/pagamento-backend:latest",
+    "deploy": "gcloud run services replace deployment.yaml",
+    "policy": "gcloud run services set-iam-policy pagamento-backend policy.yaml"
   },
   "keywords": [],
   "author": "Ciro Oshiro, Daniel Clemente, Eliane Yumi",
@@ -29,6 +31,7 @@
     "express-validator": "^7.0.1",
     "firebase": "^10.11.1",
     "firebase-admin": "^12.1.0",
+    "google-auth-library": "^9.14.1",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "lodash.isequal": "^4.5.0",

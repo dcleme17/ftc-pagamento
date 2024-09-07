@@ -6,13 +6,13 @@
     "description": "Conjuntos dde recursos e operações do Tech Challenge da FIAP"
   },
   "host": [
-    "backend-koxvlyfy2a-rj.a.run.app"
+    "pagamento-backend-91827266597.southamerica-east1.run.app"
   ],
   "basePath": "/",
   "tags": [
     {
       "name": "Pagamento",
-      "description": "APIs do domínio de Pagamento"
+      "description": "APIs do domínio de pagamento"
     }
   ],
   "schemes": [
@@ -31,7 +31,7 @@
     "/api/health-check/v1": {
       "get": {
         "tags": [
-          "Pagamento"
+          "Health Check"
         ],
         "summary": "Health Check da API",
         "description": "Health Check da API",
@@ -49,15 +49,114 @@
         "deprecated": false
       }
     },
-    "/api/pagamentos/v1/webhook/mercadopago": {
+    "/api/pagamentos/v1": {
+      "post": {
+        "tags": [
+          "Pagamento"
+        ],
+        "summary": "Recebe a solicitação de criação de um pagamento",
+        "description": "Recebe os dados necessários para criação de um pagamento",
+        "operationId": "postPagamento",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/post_pagamento"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/pagamentos/v1/{identificadorExterno}": {
+      "get": {
+        "tags": [
+          "Pagamento"
+        ],
+        "summary": "Consulta de pagamento",
+        "description": "Consulta um pagamento através do código de externo",
+        "operationId": "getPagamento",
+        "parameters": [
+          {
+            "name": "identificadorExterno",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "Pagamento"
+        ],
+        "summary": "Atualiza o informações do pagamento",
+        "description": "Atualiza as informações do pagamento a partir do Id de identificação externo",
+        "operationId": "putPagmaentos",
+        "parameters": [
+          {
+            "name": "identificadorExterno",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/put_pagamento"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/pagamentos/v1/webhook/mercadopago/{identificadorExterno}": {
       "post": {
         "tags": [
           "Pagamento"
         ],
         "summary": "Recebe os eventos de pagamento do parceiro",
-        "description": "Recebe os eventos do parceiro e envia para o domínio de pedidos",
+        "description": "Recebe os eventos do parceiro para dar sequencia ao workflow de pagamentos",
         "operationId": "postWebhookMercadopago",
         "parameters": [
+          {
+            "name": "identificadorExterno",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -84,18 +183,73 @@
     "post_webhook_mercadopago": {
       "type": "object",
       "properties": {
-        "action": {
+        "resource": {
           "type": "string",
-          "example": "state_FINISHED"
+          "example": "https://api.mercadolibre.com/merchant_orders/22588740544"
         },
-        "id": {
+        "topic": {
+          "type": "string",
+          "example": "merchant_order"
+        }
+      }
+    },
+    "post_pagamento": {
+      "type": "object",
+      "properties": {
+        "nome": {
+          "type": "string",
+          "example": "TESTE TESTE"
+        },
+        "cpf": {
+          "type": "string",
+          "example": "12345678909"
+        },
+        "email": {
+          "type": "string",
+          "example": "teste@teste.com"
+        },
+        "valor": {
+          "type": "string",
+          "example": "1.99"
+        },
+        "parcelamento": {
+          "type": "string",
+          "example": "1"
+        },
+        "meio": {
+          "type": "string",
+          "example": "PIX"
+        },
+        "identificadorExterno": {
           "type": "string",
           "example": "123456"
+        },
+        "workflow": {
+          "type": "string",
+          "example": "https://workflows/idasdasdas"
         }
       },
       "required": [
-        "action",
-        "id"
+        "nome",
+        "cpf",
+        "email",
+        "valor",
+        "parcelamento",
+        "meio",
+        "identificadorExterno",
+        "workflow"
+      ]
+    },
+    "put_pagamento": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "example": "PENDENTE"
+        }
+      },
+      "required": [
+        "status"
       ]
     }
   },

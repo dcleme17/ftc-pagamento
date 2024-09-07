@@ -38,6 +38,8 @@ export class MercadoPagoExternal {
 
       const payload = this.pedidoPayload(descricao, codigoPedido, total)
 
+      console.info(JSON.stringify(payload))
+
       const axios = create({
         baseURL: `${MERCADOPAGO_URL}`,
         timeout: 5000,
@@ -53,6 +55,24 @@ export class MercadoPagoExternal {
       )
     }
 
+    consultarPedido(resource: string) {
+      const {
+        MERCADOPAGO_TOKEN, 
+      } = process.env;
+
+      const axios = create({
+        timeout: 5000,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${MERCADOPAGO_TOKEN}`
+        }
+      });
+
+      return axios.get(
+        resource
+      )      
+    }
+
     private pedidoPayload(descricao: string, codigoPedido: string, total: number): Object {
       return {
         "description": descricao,
@@ -63,15 +83,15 @@ export class MercadoPagoExternal {
             "category": "marketplace",
             "title": `Pedido ${codigoPedido}`,
             "description": descricao,
-            "unit_price": total,
+            "unit_price": new Number(total),
             "quantity": 1,
             "unit_measure": "unit",
-            "total_amount": total
+            "total_amount": new Number(total)
           }
         ],
-        "notification_url": `${process.env.MERCADOPAGO_WEBHOOK_URL}/api/pagamentos/v1/webhook/${codigoPedido}`,
+        "notification_url": `${process.env.MERCADOPAGO_WEBHOOK_URL}/api/pagamentos/v1/webhook/mercadopago/${codigoPedido}`,
         "title": `Pedido ${codigoPedido}`,
-        "total_amount": total
+        "total_amount": new Number(total)
       }
     }
 

@@ -15,7 +15,7 @@ router.get('/v1',
         #swagger.security = [{
           "JWT": []
         }]        
-        #swagger.tags = ['Pedido']
+        #swagger.tags = ['Health Check']
     */ 
     return next(new CustomResponse(200, 'OK - FASE 3.', null));
   });

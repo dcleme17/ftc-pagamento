@@ -7,40 +7,9 @@ import { PagamentoExternal } from 'domains/pagamento/adapter/driven/infra/extern
 
 const router = Router();
 
-router.post('/v1/webhook/mercadopago',  
-  body('id').trim().isLength({ min: 1, max: 16 }).notEmpty(),
-  body('action').trim().isLength({ min: 1, max: 20 }).notEmpty(),
-  (request: Request, _response: Response, next: NextFunction) => {
-
-    /**
-        @Swagger
-        #swagger.auto = true
-        #swagger.summary = 'Recebe os eventos de pagamento do parceiro'
-        #swagger.description = 'Recebe os eventos do parceiro e envia para o domínio de pedidos'
-        #swagger.operationId = 'postWebhookMercadopago'
-        #swagger.deprecated = false
-        #swagger.security = [{
-          "JWT": []
-        }]            
-        #swagger.tags = ['Pagamento']
-        #swagger.parameters['body'] = { 
-                in: 'body', 
-                'schema': { $ref: '#/definitions/post_webhook_mercadopago' }
-        }
-    */
-
-    const database = new PagamentoDatabase()
-    const external = new PagamentoExternal()
-    const service = new PagamentoUseCases(database, external)
-    const controller = new PagamentoController(service)
-
-    controller.webhookMercadoPago(request, next).then()
-  });
-
-
-  router.post('/v1',  
-  body('nome').trim().isLength({ min: 1, max: 60 }).notEmpty(),
-  body('cpf').trim().isLength({ min: 1, max: 14 }).notEmpty(),
+router.post('/v1',  
+  // body('nome').trim().isLength({ min: 1, max: 60 }).notEmpty(),
+  // body('cpf').trim().isLength({ min: 1, max: 14 }).notEmpty(),
   body('email').trim().isLength({ min: 1, max: 60 }).notEmpty(),
   body('valor').trim().isLength({ min: 1, max: 10 }).notEmpty(),
   body('parcelamento').trim().isLength({ min: 1, max: 2 }).notEmpty(),
@@ -50,9 +19,9 @@ router.post('/v1/webhook/mercadopago',
     /**
         @Swagger
         #swagger.auto = true
-        #swagger.summary = 'Recebe os eventos de pagamento do parceiro'
-        #swagger.description = 'Recebe os eventos do parceiro e envia para o domínio de pedidos'
-        #swagger.operationId = 'postWebhookMercadopago'
+        #swagger.summary = 'Recebe a solicitação de criação de um pagamento'
+        #swagger.description = 'Recebe os dados necessários para criação de um pagamento'
+        #swagger.operationId = 'postPagamento'
         #swagger.deprecated = false
         #swagger.security = [{
           "JWT": []
@@ -60,7 +29,7 @@ router.post('/v1/webhook/mercadopago',
         #swagger.tags = ['Pagamento']
         #swagger.parameters['body'] = { 
                 in: 'body', 
-                'schema': { $ref: '#/definitions/post_webhook_mercadopago' }
+                'schema': { $ref: '#/definitions/post_pagamento' }
         }
     */
 
@@ -72,25 +41,22 @@ router.post('/v1/webhook/mercadopago',
     controller.criar(request, next).then()
   });
 
-  router.get('/v1/:identificadorExterno',  
+router.get('/v1/:identificadorExterno',  
     param('identificadorExterno').trim().isLength({ min: 1, max: 20 }).notEmpty(),
     (request: Request, _response: Response, next: NextFunction) => {
 
     /**
         @Swagger
         #swagger.auto = true
-        #swagger.summary = 'Recebe os eventos de pagamento do parceiro'
-        #swagger.description = 'Recebe os eventos do parceiro e envia para o domínio de pedidos'
-        #swagger.operationId = 'postWebhookMercadopago'
+        #swagger.summary = 'Consulta de pagamento'
+        #swagger.description = 'Consulta um pagamento através do código de externo'
+        #swagger.operationId = 'getPagamento'
         #swagger.deprecated = false
         #swagger.security = [{
           "JWT": []
         }]            
         #swagger.tags = ['Pagamento']
-        #swagger.parameters['body'] = { 
-                in: 'body', 
-                'schema': { $ref: '#/definitions/post_webhook_mercadopago' }
-        }
+ 
     */
 
     const database = new PagamentoDatabase()
@@ -99,6 +65,65 @@ router.post('/v1/webhook/mercadopago',
     const controller = new PagamentoController(service)
 
     controller.buscaUltimaVersao(request, next).then()
+  });
+
+router.post('/v1/webhook/mercadopago/:identificadorExterno',  
+    param('identificadorExterno').trim().isLength({ min: 1, max: 20 }).notEmpty(),
+    (request: Request, _response: Response, next: NextFunction) => {
+  
+      /**
+          @Swagger
+          #swagger.auto = true
+          #swagger.summary = 'Recebe os eventos de pagamento do parceiro'
+          #swagger.description = 'Recebe os eventos do parceiro para dar sequencia ao workflow de pagamentos'
+          #swagger.operationId = 'postWebhookMercadopago'
+          #swagger.deprecated = false
+          #swagger.security = [{
+            "JWT": []
+          }]            
+          #swagger.tags = ['Pagamento']
+          #swagger.parameters['body'] = { 
+                  in: 'body', 
+                  'schema': { $ref: '#/definitions/post_webhook_mercadopago' }
+          }
+      */
+  
+      const database = new PagamentoDatabase()
+      const external = new PagamentoExternal()
+      const service = new PagamentoUseCases(database, external)
+      const controller = new PagamentoController(service)
+  
+      controller.webhookMercadoPago(request, next).then()
+  });
+
+router.put('/v1/:identificadorExterno', 
+  param('identificadorExterno').trim().isLength({ min: 1, max: 20 }).notEmpty(), 
+  body('status').trim().isLength({ min: 1, max: 20 }).notEmpty(),
+    (request: Request, _response: Response, next: NextFunction) => {
+  
+      /**
+          @Swagger
+          #swagger.auto = true
+          #swagger.summary = 'Atualiza o informações do pagamento'
+          #swagger.description = 'Atualiza as informações do pagamento a partir do Id de identificação externo'
+          #swagger.operationId = 'putPagmaentos'
+          #swagger.deprecated = false
+          #swagger.security = [{
+            "JWT": []
+          }]            
+          #swagger.tags = ['Pagamento']
+          #swagger.parameters['body'] = { 
+                  in: 'body', 
+                  'schema': { $ref: '#/definitions/put_pagamento' }
+          }
+      */
+  
+      const database = new PagamentoDatabase()
+      const external = new PagamentoExternal()
+      const service = new PagamentoUseCases(database, external)
+      const controller = new PagamentoController(service)
+  
+      controller.atualiza(request, next).then()
   });
 
   export default router;

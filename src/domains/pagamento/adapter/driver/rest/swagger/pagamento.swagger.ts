@@ -1,6 +1,8 @@
+import { StatusPagamento } from "../../../../core/entities/pagamento"
+
 export const post_webhook_mercadopago = {
-    $action: "state_FINISHED",
-    $id: "123456",
+    resource: 'https://api.mercadolibre.com/merchant_orders/22588740544', 
+    topic: 'merchant_order'
 }   
 
 export const post_pagamento = {
@@ -11,5 +13,10 @@ export const post_pagamento = {
     $parcelamento: "1",
     $meio: "PIX",
     $identificadorExterno: "123456",
+    $workflow: "https://workflows/idasdasdas"
+}   
+
+export const put_pagamento = {
+    $status: StatusPagamento.PENDENTE
 }   
 

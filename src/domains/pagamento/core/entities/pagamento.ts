@@ -15,7 +15,7 @@ export enum StatusPagamento {
 }
 export class Pagamento {
 
-    constructor(cpf: string, nome: string, email: string, valor: number, parcelamento: number, meio: string, identificadorExterno: string, ) {
+    constructor(cpf: string, nome: string, email: string, valor: number, parcelamento: number, meio: string, identificadorExterno: string, workflow: object ) {
         this.nome = nome
         this.cpf = cpf  
         this.email = email
@@ -23,6 +23,7 @@ export class Pagamento {
         this.parcelamento = parcelamento
         this.meio = meio
         this.identificadorExterno = identificadorExterno
+        this.workflow = workflow;
         this.data = new Date()
         this.parceiroNegocio = null
         this.status = null
@@ -65,6 +66,11 @@ export class Pagamento {
         return this.identificadorExterno
     }
 
+    private workflow: object
+    public getWorkflow(): object {
+        return this.workflow
+    }
+
     private data: Date
     public getData(): Date {
         return this.data
@@ -86,11 +92,11 @@ export class Pagamento {
         this.parceiroNegocio = parceiroNegocio;
     }
 
-    private metadata: Object | null
-    public getMetadata(): Object | null {
+    private metadata: object | null
+    public getMetadata(): object | null {
         return this.metadata
     }
-    public setMetadata(metadata: Object | null): void {
+    public setMetadata(metadata: object | null): void {
         this.metadata = metadata;
     }     
 
@@ -110,7 +116,9 @@ export class Pagamento {
     public equals(comparable: Pagamento): boolean {
         /** Não gostei de fazer essa lógica, deve ter alguma forma menos custosa */
         
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const comparable1: any = JSON.parse(JSON.stringify(this))
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const comparable2: any = JSON.parse(JSON.stringify(comparable))
 
         delete comparable1.versao
